@@ -75,11 +75,13 @@ function template_preprocess_cod_schedule_grid(&$vars) {
 
   // Find all possible rooms, construct a template array.
   foreach ($renders as $num => $rf) {
+
     // title_1 is the title of the back-referenced room node :(
     $rooms[$rf['title_1']] = array(
       'data' => '',
       'class' => array('empty'),
     );
+
     // Set up our rows - they should already be in the desired order by time.
     $rows[$rf['field_slot_datetime']] = array(
       'time' => array(
@@ -114,6 +116,7 @@ function template_preprocess_cod_schedule_grid(&$vars) {
     $vars['fields'][$field] = drupal_clean_css_identifier($field);
   }
 
+  // Fields we are going to use to add class to each cell with a scheduled item.
   $whitelist = array(
     'title_1',
     'field_session_track',
