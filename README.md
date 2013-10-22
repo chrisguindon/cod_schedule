@@ -2,7 +2,7 @@ This module adds a View and a new View style to display a session grid for COD 7
 
 This module is a fork of the work done by [pwolanin](https://drupal.org/sandbox/pwolanin/1884410). 
 
-Developpement for this fork is currently done on [chrisguindon sandbox](https://github.com/chrisguindon/cod_session) project page.
+Developpement for this fork is currently done on [chrisguindon sandbox](https://drupal.org/sandbox/chrisguindon/2117329) project page.
 
 Documentation
 -------------
