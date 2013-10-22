@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * cod_schedule.views_default.inc

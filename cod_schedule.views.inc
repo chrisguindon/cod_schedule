@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Views hooks for cod_schedule feature
+ * COD Schedule cod_schedule.views.inc file.
  */
 
 /**

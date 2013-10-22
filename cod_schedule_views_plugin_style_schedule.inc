@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains the session grid style plugin.
+ * COD Schedule cod_schedule_views_plugin_style_schedule.inc file.
  */
 
 /**
