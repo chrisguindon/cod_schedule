@@ -12,9 +12,6 @@
  */
 class CodScheduleViewsPluginStyleSchedule extends views_plugin_style_table {
 
-  /**
-   * Extend the settings definition.
-   */
   function option_definition() {
     $options = parent::option_definition();
 
@@ -24,8 +21,9 @@ class CodScheduleViewsPluginStyleSchedule extends views_plugin_style_table {
     return $options;
   }
 
+
   /**
-   * Extend the settings form.
+   * Render the given style.
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
