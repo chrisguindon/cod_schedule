@@ -41,16 +41,10 @@ function cod_schedule_date_format_types() {
 }
 
 /**
- * Implements hook_enable().
- */
-function camp_schedule_enable() {
-  variable_set('date_format_cod_schedule_session', 'g:i a');
-}
-
-/**
  * Display the schedule in a grid format.
  */
 function template_preprocess_cod_schedule_grid(&$vars) {
+
   $view = $vars['view'];
   // We need the raw data for grouping, which is passed in as $vars['rows'].
   // However, the template also needs to use for the rendered fields.  We
