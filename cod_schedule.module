@@ -1,0 +1,169 @@
+<?php
+/**
+ * @file
+ * cod_schedule.module
+ */
+
+include_once 'cod_schedule.features.inc';
+
+/**
+ * Implements hook_permission().
+ */
+function cod_schedule_permission() {
+   return array(
+    'access cod schedule' => array(
+      'title' => t('Access COD Schedule'),
+    ),
+  );
+}
+
+/**
+ * Display the schedule in a grid format.
+ */
+function template_preprocess_cod_schedule_grid(&$vars) {
+  $view = $vars['view'];
+  // We need the raw data for grouping, which is passed in as $vars['rows'].
+  // However, the template also needs to use for the rendered fields.  We
+  // therefore swap the raw data out to a new variable and reset $vars['rows']
+  // so that it can get rebuilt.
+  // Store rows so that they may be used by further preprocess functions.
+  $result   = $vars['result'] = $vars['rows'];
+  $vars['rows'] = array();
+  $vars['field_classes'] = array();
+
+  $options  = $view->style_plugin->options;
+  $handler  = $view->style_plugin;
+  $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
+  $fields   = &$view->field;
+  $active   = !empty($handler->active) ? $handler->active : '';
+
+
+  // Fields must be rendered in order as of Views 2.3, so we will pre-render
+  // everything.
+  $renders = $handler->render_fields($result);
+  $rooms = array();
+  $rows = array();
+
+  // Find all possible rooms, construct a template array.
+  foreach ($renders as $num => $rf) {
+    // title_1 is the title of the back-referenced room node :(
+    $rooms[$rf['title_1']] = array(
+      'data' => '',
+      'class' => array('empty'),
+    );
+    // Set up our rows - they should already be in the desired order by time.
+    $rows[$rf['field_slot_datetime']] = array(
+      'time' => array(
+        'header' => TRUE,
+        'data' => $rf['field_slot_datetime'],
+        'class' => array('slot-datetime'),
+      ),
+    );
+  }
+
+  $vars['header'][] = array(
+    'class' => array('slot-datetime'),
+    'data' => '',
+    'header' => TRUE,
+  );
+
+  foreach($rooms as $key => $value){
+  	$vars['header'][] = array(
+      'class' => array('room'),
+      'data' => $key,
+      'header' => TRUE,
+  	);
+  }
+
+  // Set up each time slot with a list of empty rooms.
+  foreach ($rows as $time => $row) {
+    $rows[$time] = $row + $rooms;
+  }
+
+  // Populate CSS identifiers.
+  foreach ($fields as $field => $info) {
+    $vars['fields'][$field] = drupal_clean_css_identifier($field);
+  }
+
+  $whitelist = array('title_1', 'field_session_track', 'field_experience', 'type', 'sticky');
+
+  foreach ($renders as $num => $rf) {
+    $cell = &$rows[$rf['field_slot_datetime']][$rf['title_1']];
+    $cell = array();
+
+    unset($rf['field_slot_datetime']);
+    $strings = array();
+
+    foreach ($rf as $field => $field_output) {
+      // Add field classes.
+      $field_classes = drupal_clean_css_identifier($field);
+      if ($fields[$field]->options['element_default_classes']) {
+        $field_classes .= " views-field views-field-" . $vars['fields'][$field];
+      }
+
+      if (in_array($field, $whitelist)) {
+        $cell['class'][] = _cod_schedule_clean_css_identifier($field . '-' . $field_output);
+      }
+
+      if ($field_output && !empty($fields[$field]) && empty($fields[$field]->options['exclude'])) {
+        $element_type = $fields[$field]->element_type(TRUE, TRUE);
+        if ($element_type) {
+          $field_output = '<' . $element_type . ' class="' . $field_classes . '">' . $field_output . '</' . $element_type . '>';
+        }
+        $strings[] = $field_output;
+      }
+    }
+    $cell['data'] = implode("\n", $strings);
+  }
+
+  // Strip out the string indexes.
+  $vars['rows'] = array_values($rows);
+
+  $count = 0;
+  foreach ($vars['rows'] as $num => $row) {
+    $vars['row_classes'][$num] = array();
+    if ($row_class_special) {
+      $vars['row_classes'][$num][] = ($count++ % 2 == 0) ? 'odd' : 'even';
+    }
+  }
+
+  if ($row_class_special) {
+    $vars['row_classes'][0][] = 'views-row-first';
+    $vars['row_classes'][count($vars['row_classes']) - 1][] = 'views-row-last';
+  }
+
+  if (empty($vars['rows']) && !empty($options['empty_table'])) {
+    $vars['rows'][0][0] = $view->display_handler->render_area('empty');
+    // Calculate the amounts of rows with output.
+    $vars['field_attributes'][0][0]['colspan'] = count($vars['header']);
+    $vars['field_classes'][0][0] = 'views-empty';
+  }
+
+  $vars['classes_array'][] = 'cols-' . count($vars['header']);
+
+  // Add the summary to the list if set.
+  if (!empty($handler->options['summary'])) {
+    $vars['attributes_array'] = array('summary' => filter_xss_admin($handler->options['summary']));
+  }
+
+  // Add the caption to the list if set.
+  if (!empty($handler->options['caption'])) {
+    $vars['caption'] = filter_xss_admin($handler->options['caption']);
+  }
+  else {
+    $vars['caption'] = '';
+  }
+}
+
+/**
+ * Prepares a string for use as a CSS identifier (element, class, or ID name).
+ *
+ * @param string $value
+ *   The identifier to clean.
+ *
+ * @return string
+ *   The cleaned identifier.
+ */
+function _cod_schedule_clean_css_identifier($value) {
+  return drupal_clean_css_identifier(drupal_strtolower(strip_tags($value)));
+}

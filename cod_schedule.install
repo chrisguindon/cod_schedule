@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the cod_schedule module.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function cod_schedule_enable() {
+  variable_set('date_format_cod_schedule_session', 'g:i a');
+}
