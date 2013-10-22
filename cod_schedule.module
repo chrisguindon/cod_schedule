@@ -10,11 +10,41 @@ include_once 'cod_schedule.features.inc';
  * Implements hook_permission().
  */
 function cod_schedule_permission() {
-   return array(
+  return array(
     'access cod schedule' => array(
       'title' => t('Access COD Schedule'),
     ),
   );
+}
+
+/**
+ * Implements hook_date_formats().
+ */
+function cod_schedule_date_formats() {
+  return array(
+    array(
+      'type' => 'cod_schedule_time_only',
+      'format' => 'g:i a',
+      'locales' => array(),
+    ),
+  );
+}
+
+/**
+ * Implements hook_date_format_types().
+ */
+function cod_schedule_date_format_types() {
+  // Define the core date format types.
+  return array(
+    'cod_schedule_session' => 'Session time (no date)',
+  );
+}
+
+/**
+ * Implements hook_enable().
+ */
+function camp_schedule_enable() {
+  variable_set('date_format_cod_schedule_session', 'g:i a');
 }
 
 /**
@@ -36,7 +66,6 @@ function template_preprocess_cod_schedule_grid(&$vars) {
   $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : TRUE;
   $fields   = &$view->field;
   $active   = !empty($handler->active) ? $handler->active : '';
-
 
   // Fields must be rendered in order as of Views 2.3, so we will pre-render
   // everything.
@@ -67,12 +96,12 @@ function template_preprocess_cod_schedule_grid(&$vars) {
     'header' => TRUE,
   );
 
-  foreach($rooms as $key => $value){
-  	$vars['header'][] = array(
+  foreach ($rooms as $key => $value) {
+    $vars['header'][] = array(
       'class' => array('room'),
       'data' => $key,
       'header' => TRUE,
-  	);
+    );
   }
 
   // Set up each time slot with a list of empty rooms.
@@ -85,7 +114,13 @@ function template_preprocess_cod_schedule_grid(&$vars) {
     $vars['fields'][$field] = drupal_clean_css_identifier($field);
   }
 
-  $whitelist = array('title_1', 'field_session_track', 'field_experience', 'type', 'sticky');
+  $whitelist = array(
+    'title_1',
+    'field_session_track',
+    'field_experience',
+    'type',
+    'sticky',
+  );
 
   foreach ($renders as $num => $rf) {
     $cell = &$rows[$rf['field_slot_datetime']][$rf['title_1']];
